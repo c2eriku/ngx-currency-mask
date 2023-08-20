@@ -1,16 +1,16 @@
 import { NgModule } from '@angular/core';
-import { NgxCurrencyMaskComponent } from './ngx-currency-mask.component';
+import { NgxCurrencyMaskDirective } from './ngx-currency-mask.directive';
 
 
 
 @NgModule({
   declarations: [
-    NgxCurrencyMaskComponent
+    NgxCurrencyMaskDirective
   ],
   imports: [
   ],
   exports: [
-    NgxCurrencyMaskComponent
+    NgxCurrencyMaskDirective
   ]
 })
 export class NgxCurrencyMaskModule { }
