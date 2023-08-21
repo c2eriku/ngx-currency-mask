@@ -37,7 +37,7 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
 
     if (event.key == 'Backspace') {
       if (target.value[selectionStart - 1] == this.service.groupSymbol) {
-        this.service.setCursorPosition(target, selectionStart - 1)
+        this.service.setCursorPosition(target, selectionStart - 1);
         event.preventDefault();
       }
     }
@@ -72,17 +72,20 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
       return;
     }
 
-    if (value.match(this.service.decimalSymbolPattern) && selectionStart == value.length) {
+    if (value.endsWith(this.service.decimalSymbol) && selectionStart == value.length) {
       return;
     }
 
     if (target.value) {
-      const decimalFormat = this.service.formatDecimal(value);
-      const currencyFormat = this.service.formatCurrency(decimalFormat, 0, this.service.maximumFractionDigits);
+      const decimalFormat = this.service.formatDecimal(value, this.service.getDecimalPlaces(value));
+      const currencyFormat = this.service.formatCurrency(decimalFormat);
       target.value = currencyFormat;
       const cursorOffset = currencyFormat.length - value.length;
       this.service.setCursorPosition(target, selectionStart + cursorOffset);
       this.onChange(decimalFormat);
+      this.onTouched();
+    }else{
+      this.onChange(undefined);
       this.onTouched();
     }
   }
