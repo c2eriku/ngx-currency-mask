@@ -17,7 +17,7 @@ export class NgxCurrencyMaskService {
   decimalSymbol: string = '.';
 
   // General variable
-  nonDigitsPattern: RegExp = new RegExp(`[^0-9\\${this.decimalSymbol}]`, 'g');
+  nonDigitsPattern: RegExp = new RegExp(`[^0-9\\${this.decimalSymbol}\-]`, 'g');
   groupSymbolPattern: RegExp = new RegExp(`\\${this.groupSymbol}`, 'g');
   decimalSymbolPattern: RegExp = new RegExp(`\\${this.decimalSymbol}`, 'g');
 
