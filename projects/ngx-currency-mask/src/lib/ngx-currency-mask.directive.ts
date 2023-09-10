@@ -1,4 +1,4 @@
-import { Directive, ElementRef, HostListener, forwardRef } from '@angular/core';
+import { Directive, ElementRef, HostListener, Input, OnInit, forwardRef } from '@angular/core';
 import { AbstractControl, ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validator } from '@angular/forms';
 import { NgxCurrencyMaskService } from './ngx-currency-mask.service';
 
@@ -20,7 +20,15 @@ import { NgxCurrencyMaskService } from './ngx-currency-mask.service';
     },
   ],
 })
-export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator {
+export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator, OnInit {
+  @Input() locale: string = this.service.locale;
+  @Input() scale: string = this.service.scale;
+  minScale: number = 0;
+  maxScale: number = 0;
+  IntegerScale: number = 1;
+  thousandsSeparator: string = ',';
+  decimalSeparator: string = '.';
+
   private onChange: (value: any) => void = () => { };
   private onTouched: () => void = () => { };
 
@@ -29,6 +37,21 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
     private service: NgxCurrencyMaskService,
   ) { }
 
+  ngOnInit(): void {
+    if (this.locale) {
+      const seperator = this.service.getSeparator(this.locale);
+      this.thousandsSeparator = seperator.thousands;
+      this.decimalSeparator = seperator.decimal;
+    }
+    if (this.scale) {
+      const scaleArray = this.scale.split(/[^0-9]/).map(el => Number(el));
+      this.IntegerScale = scaleArray[0];
+      this.minScale = scaleArray[1];
+      this.maxScale = scaleArray[2];
+    }
+
+  }
+
 
   @HostListener('keydown', ['$event'])
   onKeyDown(event: KeyboardEvent) {
@@ -36,8 +59,8 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
     const selectionStart: number = target.selectionStart as number;
 
     if (event.key == 'Backspace') {
-      if (target.value[selectionStart - 1] == this.service.groupSymbol) {
-        this.service.setCursorPosition(target, selectionStart - 1);
+      if (target.value[selectionStart - 1] == this.thousandsSeparator) {
+        this.setCursorPosition(selectionStart - 1);
         event.preventDefault();
       }
     }
@@ -49,13 +72,13 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
     const target: HTMLInputElement = event.target as HTMLInputElement;
     const selectionStart: number = target.selectionStart as number;
 
-    if (event.key == '.') {
-      if ((target.value.match(/\./g)?.length ?? 0) > 0 || selectionStart != target.value.length) {
+    if (event.key == this.decimalSeparator) {
+      if ((target.value.match(new RegExp(`\\${this.decimalSeparator}`, 'g'))?.length ?? 0) > 0 || selectionStart != target.value.length) {
         event.preventDefault();
       }
     }
 
-    if (event.key.match(this.service.nonDigitsPattern)) {
+    if (event.key.match(new RegExp(`[^0-9\\${this.decimalSeparator}\-]`, 'g'))) {
       event.preventDefault();
     }
   }
@@ -64,27 +87,35 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
   @HostListener('input', ['$event'])
   onInput(event: InputEvent) {
     const target: HTMLInputElement = event.target as HTMLInputElement;
-    const value: string = target.value;
-    const selectionStart: number = target.selectionStart ?? value.length;
+    const selectionStart: number = target.selectionStart ?? target.value.length;
 
     // Skip handling input methods that require composition
     if (event.isComposing) {
       return;
     }
 
-    if (value.endsWith(this.service.decimalSymbol) && selectionStart == value.length) {
+    if (target.value.endsWith(this.decimalSeparator) && selectionStart == target.value.length) {
       return;
     }
 
     if (target.value) {
-      const decimalFormat = this.service.formatDecimal(value, this.service.getDecimalPlaces(value));
-      const currencyFormat = this.service.formatCurrency(decimalFormat);
+      let decimalNumber: number = this.getDecimalNumber(target.value);
+      const decimalPart = target.value.split(this.decimalSeparator)[1];
+      const decimalPlaces = decimalPart ? (decimalPart.length > this.maxScale ? this.maxScale : decimalPart.length) : 0;
+
+      decimalNumber = this.truncateNumber(decimalNumber, decimalPlaces);
+      const currencyFormat = Number(decimalNumber).toLocaleString(this.locale, {
+        minimumFractionDigits: decimalPlaces,
+        maximumFractionDigits: this.maxScale
+      });
+
+      const cursorOffset = currencyFormat.length - target.value.length;
       target.value = currencyFormat;
-      const cursorOffset = currencyFormat.length - value.length;
-      this.service.setCursorPosition(target, selectionStart + cursorOffset);
-      this.onChange(decimalFormat);
+      this.setCursorPosition(selectionStart + cursorOffset);
+
+      this.onChange(decimalNumber);
       this.onTouched();
-    }else{
+    } else {
       this.onChange(undefined);
       this.onTouched();
     }
@@ -95,16 +126,24 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
   onBlur(event: any) {
     const target: HTMLInputElement = event.target as HTMLInputElement;
     const selectionStart: number = target.selectionStart ?? target.value.length;
+
     if (target.value) {
-      if (target.value.endsWith(this.service.decimalSymbol)) {
+      if (target.value.endsWith(this.decimalSeparator)) {
         target.value = target.value.slice(0, -1);
       }
-      const decimalFormat = this.service.formatDecimal(target.value);
-      const currencyFormat = this.service.formatCurrency(decimalFormat);
-      target.value = currencyFormat;
+      let decimalNumber: number = this.getDecimalNumber(target.value);
+      decimalNumber = this.truncateNumber(decimalNumber, this.maxScale);
+      const currencyFormat = Number(decimalNumber).toLocaleString(this.locale, {
+        minimumIntegerDigits: this.IntegerScale,
+        minimumFractionDigits: this.maxScale,
+        maximumFractionDigits: this.maxScale
+      });
+
       const cursorOffset = currencyFormat.length - target.value.length;
-      this.service.setCursorPosition(target, selectionStart + cursorOffset);
-      this.onChange(decimalFormat);
+      target.value = currencyFormat;
+      this.setCursorPosition(selectionStart + cursorOffset);
+
+      this.onChange(decimalNumber);
     }
   }
 
@@ -112,15 +151,15 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
   @HostListener('compositionend', ['$event'])
   onCompositionEnd(event: CompositionEvent): void {
     const target: HTMLInputElement = event.target as HTMLInputElement;
-    const value: string = target.value;
-    const selectionStart: number = target.selectionStart ?? value.length;
+    const selectionStart: number = target.selectionStart ?? target.value.length;
 
     if (target.value) {
-      const decimalFormat = this.service.formatDecimal(target.value.replace(this.service.nonDigitsPattern, ''));
-      const currencyFormat = this.service.formatCurrency(decimalFormat);
+      const decimalFormat = this.getDecimalNumber(target.value);
+      const currencyFormat = Number(decimalFormat).toLocaleString(this.locale);
+
+      const cursorOffset = currencyFormat.length - target.value.length;
       target.value = currencyFormat;
-      const cursorOffset = currencyFormat.length - value.length;
-      this.service.setCursorPosition(target, selectionStart + cursorOffset);
+      this.setCursorPosition(selectionStart + cursorOffset);
 
       this.onChange(decimalFormat);
       this.onTouched();
@@ -141,7 +180,11 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
   /* ControlValueAccessor */
   writeValue(value: any): void {
     if (value) {
-      this.el.nativeElement.value = this.service.formatCurrency(value);
+      this.el.nativeElement.value = Number(value).toLocaleString(this.locale, {
+        minimumIntegerDigits: this.IntegerScale,
+        minimumFractionDigits: this.minScale,
+        maximumFractionDigits: this.maxScale
+      });
     }
   }
 
@@ -155,5 +198,40 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
 
   setDisabledState?(isDisabled: boolean): void {
     this.el.nativeElement.disabled = isDisabled;
+  }
+
+
+
+
+
+  getDecimalNumber(value: string): number {
+    const decimalFormat = value.replace(new RegExp(`[^0-9\\${this.decimalSeparator}\-]`, 'g'), '')
+      .replace(new RegExp(`\\${this.decimalSeparator}`, 'g'), '.');
+    return Number(decimalFormat);
+  }
+
+
+  /**
+   * Truncates a number to a specified number of decimal places.
+   * @param {number} number A number to be truncated.
+   * @param {number} decimalPlaces A number of decimal places to truncate to.
+   * @returns {number} The truncated number.
+   */
+  truncateNumber(number: number, decimalPlaces: number): number {
+    const factor = Math.pow(10, decimalPlaces);
+    return Math.floor(number * factor) / factor;
+  }
+
+
+  /**
+   * Sets the cursor position within an HTMLInputElement.
+   * @param {HTMLInputElement} el An input element to set the cursor position for.
+   * @param {number} cursorPosition The desired cursor position to set.
+   */
+  setCursorPosition(cursorPosition: number): void {
+    if (cursorPosition <= -1) {
+      cursorPosition = 0;
+    }
+    this.el.nativeElement.setSelectionRange(cursorPosition, cursorPosition);
   }
 }
