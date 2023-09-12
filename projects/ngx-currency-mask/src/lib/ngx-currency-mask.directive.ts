@@ -23,6 +23,10 @@ import { NgxCurrencyMaskService } from './ngx-currency-mask.service';
 export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator, OnInit {
   @Input() locale: string = this.service.locale;
   @Input() scale: string = this.service.scale;
+
+  @Input() max!: number | string;
+  @Input() min!: number | string;
+
   minScale: number = 0;
   maxScale: number = 0;
   IntegerScale: number = 1;
@@ -171,6 +175,12 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
 
   /* Validator */
   validate(control: AbstractControl<any, any>): ValidationErrors | null {
+    if (this.max && this.max < control.value) {
+      return { max: true };
+    }
+    if (this.min && this.min > control.value) {
+      return { min: true };
+    }
     return null;
   }
 
