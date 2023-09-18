@@ -14,20 +14,19 @@
                 ##### Commonly Used
                 A way directly applied to specific DOM `/<input />` elements.
             </markdown>
-            <form class="container border p-2">
+            <form class="container border p-2" #demo1Form="ngForm">
                 <div class="row">
 
                     <div class="col">
                         <label>Code in HTML DOM Template:</label>
-                        <pre class="language-javascript">{{demo1Code}}</pre>
+                        <markdown clipboard [data]="demo1Code | language:'html'"></markdown>
                     </div>
 
                 </div>
                 <div class="row mt-2">
                     <div class="col input-group input-group-sm">
                         <label class="input-group-text">Locale</label>
-                        <select class="form-select form-select-sm" name="locale" [(ngModel)]="demo1Locale"
-                            (change)="updateDemo1($event)">
+                        <select class="form-select form-select-sm" name="demo1Locale" [(ngModel)]="demo1Locale">
                             <option value="en-US" selected>en-US</option>
                             <option value="de-DE">de-DE</option>
                         </select>
@@ -37,25 +36,46 @@
                         <span class="input-group-text">scale</span>
                         <input type="text" class="form-control" name="demo1Scale" [(ngModel)]="demo1Scale">
                     </div>
+
+                    <div class="col input-group input-group-sm">
+                        <span class="input-group-text">max</span>
+                        <input type="number" class="form-control" name="demo1Max" [(ngModel)]="demo1Max">
+                    </div>
+
+                    <div class="col input-group input-group-sm">
+                        <span class="input-group-text">min</span>
+                        <input type="number" class="form-control" name="demo1Min" [(ngModel)]="demo1Min">
+                    </div>
                 </div>
             </form>
         </div>
         <div class="row align-items-center mt-2">
             <div class="col">
-                <div class="input-group input-group-sm" *ngIf="updControl">
+                <div class="input-group input-group-sm" *ngIf="demo1Update">
                     <span class="input-group-text" id="inputGroup-sizing-sm">demo1</span>
-                    <input type="text" class="form-control" #demoInput currencyMask [(ngModel)]="demo1"
-                        [locale]="demo1Locale" [scale]="demo1Scale" max="999">
+                    <input #demo1Input="ngModel" type="text" class="form-control" currencyMask name="demo1"
+                        [(ngModel)]="demo1" [locale]="demo1Locale" [scale]="demo1Scale" [max]="demo1Max"
+                        [min]="demo1Min">
                 </div>
-
-                <div class="input-group input-group-sm" *ngIf="!updControl">
+                <div class="input-group input-group-sm" *ngIf="!demo1Update">
                     <span class="input-group-text" id="inputGroup-sizing-sm">demo1</span>
-                    <input type="text" class="form-control" #demoInput currencyMask [(ngModel)]="demo1"
-                        [locale]="demo1Locale" [scale]="demo1Scale">
+                    <input #demo1Input="ngModel" type="text" class="form-control" currencyMask name="demo1"
+                        [(ngModel)]="demo1" [locale]="demo1Locale" [scale]="demo1Scale" [max]="demo1Max"
+                        [min]="demo1Min">
                 </div>
             </div>
-            <div class="col">
-                <pre class="language-javascript">demo1: {{demo1}}</pre>
+            <div class="col code">
+                <div class="row">
+                    <pre class="col py-0 d-flex align-items-center language-javascript">demo1: {{demo1}}</pre>
+                    <div *ngIf="demo1Input?.valid; else demo1InputInvalid" class="col-auto ms-auto state-valid">
+                        <i class="bi bi-check me-1"></i>ng-valid
+                    </div>
+                    <ng-template #demo1InputInvalid>
+                        <div class="col-auto ms-auto state-invalid">
+                            <i class="bi bi-x me-1"></i>ng-invalid
+                        </div>
+                    </ng-template>
+                </div>
             </div>
         </div>
 

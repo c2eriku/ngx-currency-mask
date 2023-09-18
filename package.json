@@ -21,6 +21,7 @@
     "@ng-bootstrap/ng-bootstrap": "^15.1.1",
     "@popperjs/core": "^2.11.6",
     "bootstrap": "^5.2.3",
+    "clipboard": "^2.0.11",
     "marked": "^4.3.0",
     "ngx-currency-mask": "file:dist/ngx-currency-mask",
     "ngx-markdown": "^16.0.0",
