@@ -9,13 +9,18 @@ export class NgxCurrencyMaskService {
   locale: string = 'en-US';
   scale: string = '1.0-0';
 
-  textAlign: string = 'left';
+  align: string = 'left';
+  prefix: string = '';
+  postfix: string = '';
 
   constructor(
     @Optional() @Inject(NGX_CURRENCY_MASK_CONFIG) config: NgxCurrencyMaskConfig
-  ) { 
+  ) {
     this.locale = config?.locale;
     this.scale = config?.scale;
+    this.align = config?.align;
+    this.prefix = config?.prefix ?? '';
+    this.postfix = config?.postfix ?? '';
   }
 
   getSeparator(locale: string): any {

@@ -27,6 +27,9 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
   @Input() max!: number | string;
   @Input() min!: number | string;
 
+  @Input() prefix: string = this.service.prefix;
+  @Input() postfix: string = this.service.postfix;
+
   minScale: number = 0;
   maxScale: number = 0;
   IntegerScale: number = 1;
@@ -113,8 +116,8 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
         maximumFractionDigits: this.maxScale
       });
 
-      const cursorOffset = currencyFormat.length - target.value.length;
-      target.value = currencyFormat;
+      const cursorOffset = currencyFormat.length + this.prefix?.length + this.postfix?.length - target.value.length;
+      target.value = this.prefix + currencyFormat + this.postfix;
       this.setCursorPosition(selectionStart + cursorOffset);
 
       this.onChange(decimalNumber);
@@ -144,7 +147,7 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
       });
 
       const cursorOffset = currencyFormat.length - target.value.length;
-      target.value = currencyFormat;
+      target.value = this.prefix + currencyFormat + this.postfix;
       this.setCursorPosition(selectionStart + cursorOffset);
 
       this.onChange(decimalNumber);
