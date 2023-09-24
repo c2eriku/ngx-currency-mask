@@ -36,3 +36,36 @@ table {
     margin: 4px;
     padding: 2px;
 }
+
+h1 {
+    @extend .pt-2;
+    font-size: 20pt;
+    font-weight: 900;
+}
+
+h2 {
+    @extend .pt-2;
+    font-size: 18pt;
+    font-weight: 900;
+}
+
+h3 {
+    @extend .pt-2, .ps-2;
+    font-size: 16pt;
+    font-weight: 700;
+}
+
+h4 {
+    @extend .pt-2, .ps-2;
+    font-size: 14pt;
+    font-weight: 700;
+}
+
+li,
+p {
+    font-size: 12px;
+}
+
+a{
+    font-weight: 900;
+}

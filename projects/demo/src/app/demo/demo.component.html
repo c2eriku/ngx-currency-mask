@@ -1,18 +1,24 @@
-<div class="container mb-4">
-    <markdown [src]="'app/demo/demo-markdown/feature.md'">
-    </markdown>
+<div class="container my-4">
+    
+    <h1>Feature</h1>
+    <ol>
+        <li><code>currencyMask</code> is an Angular directive for native HTML <code>&lt;input></code> tag.</li>
+        <li>Non-intrusive, can add/remove directive easily and no side effect.</li>
+        <li><code class="language-html">&lt;input type="number"></code> like, specifically addressing and handling the bugs that may be caused by
+            composition-based input methods.</li>
+        <li>Configure by ECMAScript Intl locale.</li>
+        <li>Only need to set up once to apply to entire project, also can customize specific <code>&lt;input></code> as needed.</li>
+    </ol>
+
     <hr>
 
-    <h3>DEMO</h3>
+    <h1>DEMO</h1>
     <div class="container">
-        <h5>
-
-        </h5>
-
         <div class="row">
+            <h2>Commonly Used</h2>
             <markdown ngPreserveWhitespaces>
-                ##### Commonly Used
-                A way directly applied to specific DOM `/<input />` elements.
+                This section demonstrates how the `currencyMask` works with common `&lt;input&gt;` element.<br>
+                Example code and fields that can be configured for the currencyMask is provide below.
             </markdown>
             <form class="container border p-2" #demo1Form="ngForm">
                 <div class="row">
@@ -24,27 +30,41 @@
 
                 </div>
                 <div class="row mt-2">
-                    <div class="col input-group input-group-sm">
-                        <label class="input-group-text">Locale</label>
-                        <select class="form-select form-select-sm" name="demo1Locale" [(ngModel)]="demo1Locale">
-                            <option value="en-US" selected>en-US</option>
-                            <option value="de-DE">de-DE</option>
-                        </select>
+                    <div class="row">
+                        <div class="col input-group input-group-sm">
+                            <label class="input-group-text">Locale</label>
+                            <select class="form-select form-select-sm" name="demo1Locale" [(ngModel)]="demo1Locale">
+                                <option value="en-US" selected>en-US</option>
+                                <option value="de-DE">de-DE</option>
+                            </select>
+                        </div>
+
+                        <div class="col input-group input-group-sm">
+                            <span class="input-group-text">scale</span>
+                            <input type="text" class="form-control" name="demo1Scale" [(ngModel)]="demo1Scale">
+                        </div>
                     </div>
 
-                    <div class="col input-group input-group-sm">
-                        <span class="input-group-text">scale</span>
-                        <input type="text" class="form-control" name="demo1Scale" [(ngModel)]="demo1Scale">
-                    </div>
+                    <div class="row mt-2">
+                        <div class="col input-group input-group-sm">
+                            <span class="input-group-text">max</span>
+                            <input type="number" class="form-control" name="demo1Max" [(ngModel)]="demo1Max">
+                        </div>
 
-                    <div class="col input-group input-group-sm">
-                        <span class="input-group-text">max</span>
-                        <input type="number" class="form-control" name="demo1Max" [(ngModel)]="demo1Max">
-                    </div>
+                        <div class="col input-group input-group-sm">
+                            <span class="input-group-text">min</span>
+                            <input type="number" class="form-control" name="demo1Min" [(ngModel)]="demo1Min">
+                        </div>
 
-                    <div class="col input-group input-group-sm">
-                        <span class="input-group-text">min</span>
-                        <input type="number" class="form-control" name="demo1Min" [(ngModel)]="demo1Min">
+                        <div class="col input-group input-group-sm">
+                            <span class="input-group-text">prefix</span>
+                            <input type="text" class="form-control" name="demo1Prefix" [(ngModel)]="demo1Prefix">
+                        </div>
+
+                        <div class="col input-group input-group-sm">
+                            <span class="input-group-text">postfix</span>
+                            <input type="text" class="form-control" name="demo1Postfix" [(ngModel)]="demo1Postfix">
+                        </div>
                     </div>
                 </div>
             </form>
@@ -55,13 +75,13 @@
                     <span class="input-group-text" id="inputGroup-sizing-sm">demo1</span>
                     <input #demo1Input="ngModel" type="text" class="form-control" currencyMask name="demo1"
                         [(ngModel)]="demo1" [locale]="demo1Locale" [scale]="demo1Scale" [max]="demo1Max"
-                        [min]="demo1Min">
+                        [min]="demo1Min" [prefix]="demo1Prefix" [postfix]="demo1Postfix">
                 </div>
                 <div class="input-group input-group-sm" *ngIf="!demo1Update">
                     <span class="input-group-text" id="inputGroup-sizing-sm">demo1</span>
                     <input #demo1Input="ngModel" type="text" class="form-control" currencyMask name="demo1"
                         [(ngModel)]="demo1" [locale]="demo1Locale" [scale]="demo1Scale" [max]="demo1Max"
-                        [min]="demo1Min">
+                        [min]="demo1Min" [prefix]="demo1Prefix" [postfix]="demo1Postfix">
                 </div>
             </div>
             <div class="col code">
@@ -79,11 +99,14 @@
             </div>
         </div>
 
+        <hr>
+
         <div class="row mt-2">
-            <markdown ngPreserveWhitespaces>
-                ##### Global Setting
-                A way that only need to configure once and take effect across the entire project.
-            </markdown>
+            <h2>Global Setting</h2>
+            <div>
+                This section demonstrates how <code>currencyMask</code> works to entire project.<br>
+                For more detailed information, please refer to the <a href="/docs">document</a>.
+            </div>
         </div>
 
         <div class="row mt-2">

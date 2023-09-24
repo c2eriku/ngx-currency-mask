@@ -1,7 +1,7 @@
 # Feature
 
-1. The Angular directive for native HTML tag `<input>`
-2. non-intrusive, can add/remove directive easily, and do not effective DOM.
-3. `<input type="number">` like, specific optimize for composition-based input method.
-4. accomplish to locale currency formats.
-5. only need to set once in the whole project, and customize specific `<input>` as you need. 
+1. `currencyMask` is an Angular directive for native HTML `<input>` tag.
+2. Non-intrusive, can add/remove directive easily and no side effect.
+3. `<input type="number">` like, specifically addressing and handling the bugs that may be caused by composition-based input methods.
+4. Configure by ECMAScript Intl locale.
+5. Only need to set up once to apply to entire project, also can customize specific `<input>` as needed.
