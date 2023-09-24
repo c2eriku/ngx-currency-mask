@@ -30,4 +30,15 @@ export class NgxCurrencyMaskService {
     }
   }
 
+  /**
+   * Truncates a number to a specified number of decimal places.
+   * @param {number} number A number to be truncated.
+   * @param {number} decimalPlaces A number of decimal places to truncate to.
+   * @returns {number} The truncated number.
+   */
+  truncateNumber(number: number, decimalPlaces: number): number {
+    const factor = Math.pow(10, decimalPlaces);
+    return Math.round(number * factor) / factor;
+  }
+
 }

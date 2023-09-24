@@ -32,7 +32,7 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
 
   minScale: number = 0;
   maxScale: number = 0;
-  IntegerScale: number = 1;
+  integerScale: number = 1;
   thousandsSeparator: string = ',';
   decimalSeparator: string = '.';
 
@@ -52,7 +52,7 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
     }
     if (this.scale) {
       const scaleArray = this.scale.split(/[^0-9]/).map(el => Number(el));
-      this.IntegerScale = scaleArray[0];
+      this.integerScale = scaleArray[0];
       this.minScale = scaleArray[1];
       this.maxScale = scaleArray[2];
     }
@@ -110,7 +110,7 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
       const decimalPart = target.value.split(this.decimalSeparator)[1];
       const decimalPlaces = decimalPart ? (decimalPart.length > this.maxScale ? this.maxScale : decimalPart.length) : 0;
 
-      decimalNumber = this.truncateNumber(decimalNumber, decimalPlaces);
+      decimalNumber = this.service.truncateNumber(decimalNumber, decimalPlaces);
       const currencyFormat = Number(decimalNumber).toLocaleString(this.locale, {
         minimumFractionDigits: decimalPlaces,
         maximumFractionDigits: this.maxScale
@@ -139,9 +139,9 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
         target.value = target.value.slice(0, -1);
       }
       let decimalNumber: number = this.getDecimalNumber(target.value);
-      decimalNumber = this.truncateNumber(decimalNumber, this.maxScale);
+      decimalNumber = this.service.truncateNumber(decimalNumber, this.maxScale);
       const currencyFormat = Number(decimalNumber).toLocaleString(this.locale, {
-        minimumIntegerDigits: this.IntegerScale,
+        minimumIntegerDigits: this.integerScale,
         minimumFractionDigits: this.maxScale,
         maximumFractionDigits: this.maxScale
       });
@@ -193,11 +193,13 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
   /* ControlValueAccessor */
   writeValue(value: any): void {
     if (value) {
-      this.el.nativeElement.value = Number(value).toLocaleString(this.locale, {
-        minimumIntegerDigits: this.IntegerScale,
-        minimumFractionDigits: this.minScale,
-        maximumFractionDigits: this.maxScale
-      });
+      this.el.nativeElement.value =
+        this.prefix + Number(value).toLocaleString(this.locale, {
+          minimumIntegerDigits: this.integerScale,
+          minimumFractionDigits: this.minScale,
+          maximumFractionDigits: this.maxScale
+        }) + this.postfix;
+      
     }
   }
 
@@ -224,16 +226,7 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
   }
 
 
-  /**
-   * Truncates a number to a specified number of decimal places.
-   * @param {number} number A number to be truncated.
-   * @param {number} decimalPlaces A number of decimal places to truncate to.
-   * @returns {number} The truncated number.
-   */
-  truncateNumber(number: number, decimalPlaces: number): number {
-    const factor = Math.pow(10, decimalPlaces);
-    return Math.floor(number * factor) / factor;
-  }
+  
 
 
   /**
