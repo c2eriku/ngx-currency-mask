@@ -1,10 +1,8 @@
 # @cceri/ngx-currency-mask
 
------
-
 ## Installation
 
-Get started and to add this `ngx-currency-mask` library to project, use the following command line.
+Get started and to install this `ngx-currency-mask` library to project, running the following command.
 
 ```bash
 npm install @cceri/ngx-currency-mask
@@ -14,13 +12,13 @@ npm install @cceri/ngx-currency-mask
 
 ## Configuration
 
-There are two way to configure `ngx-currency-mask`, global configuration and inside DOM configuration,
+There are two way to configure `ngx-currency-mask`, global configuration and single `<input>` configuration,
 
 ### 1. Global Configuration
 
-Import `NgxCurrencyMaskModule` inside `AppModule` or any of project root module.
+Import `NgxCurrencyMaskModule` inside `AppModule` or any of the project's root modules and provide values to configure the entire project.
 
-```javascript
+```diff
   @NgModule({
     declarations: [...],
     imports: [
@@ -34,7 +32,7 @@ Import `NgxCurrencyMaskModule` inside `AppModule` or any of project root module.
 +         align: 'left',
 +         prefix: '',
 +         postfix: '',
-+         } }
++     }}
     ]
   })
 ```
@@ -42,20 +40,20 @@ Import `NgxCurrencyMaskModule` inside `AppModule` or any of project root module.
 #### Properties
 
 This table lists the properties for `NGX_CURRENCY_MASK_CONFIG`, which can be used to configure global settings.  
-The properties inside the table are all **optional**, which means that only need to configure what is require.
+The properties inside the table are all **optional**, which means that only need to pick what you require.
 | Property | Default | Description |
-| --- | --- | --- |
-| **locale**: string | 'en-US' | The locale for `currencyMask` configuration. |
-| **scale**: string | '1.2-2' | The scale of decimal representation. |
-| **align**: string | 'left' | The option to control `<input>` text's alignment. |
-| **prefix**: string | '' | prefix of the representation. |
-| **postfix**: string | '' | postfix of the representation. |
+| --- | :---: | --- |
+| **locale** | `en-US` | The locale for `currencyMask` configuration. |
+| **scale** | `1.2-2` | The scale of decimal representation, parameter written in the following format:  `"1.minFractionDigits-maxFractionDigits"` </br> Example: `<input currencyMask scale="1.2-2">`, would format to `9,999.99` |
+| **align** | `left` | The option to control `<input>` text's alignment. |
+| **prefix** | `''` | prefix of the representation. |
+| **postfix** | `''` | postfix of the representation. |
 
 ### 2. Single `<input>` Configuration
 
 Import `NgxCurrencyMaskModule` inside **target Module**, and configure in components which is in this module.
 
-```javascript
+```diff
   @NgModule({
     declarations: [...],
     imports: [
@@ -72,16 +70,22 @@ This section lists the attributes available for the `currencyMask` directive. </
 
 | Attributes | Description |
 | --- | --- |
-| @Input() **locale**: string | The locale for `currencyMask` configuration. |
-| @Input() **scale**: string | Set decimal representation, parameter written in the following format: </br>`"1.minFractionDigits-maxFractionDigits"` </br> Example: `<input currencyMask scale="1.2-2">`, would format to `9,999.99` |
-| @Input() **max**: string | The maximum (numeric) value for this item, if exceed the maximum value, `<input>` would be invalid. |
-| @Input() **min**: string | The minimum (numeric) value for this item, if  the deceed the minimum value, `<input>` would be invalid. |
-| @Input() **prefix**: string | prefix of the representation. |
-| @Input() **postfix**: string | postfix of the representation. |
+| **locale** | The locale for `currencyMask` configuration. |
+| **scale** |  The scale of decimal representation, parameter written in the following format: </br>`"1.minFractionDigits-maxFractionDigits"` </br> Example: `<input currencyMask scale="1.2-2">`, would format to `9,999.99` |
+| **max** | The maximum (numeric) value for this item, if exceed the maximum value, `<input>` would be invalid. |
+| **min** | The minimum (numeric) value for this item, if  the deceed the minimum value, `<input>` would be invalid. |
+| **prefix** | prefix of the representation. |
+| **postfix** | postfix of the representation. |
+
+-----
+
+## License
+
+This library is licensed under **MIT**.
 
 -----
 
 ## Remarks
 
-If there are anything could be improved, please feel free to contact me via [email](mailto:c2eriku@gmail.com), giving comments, or pull request.  
+If there are anything could be improved, please feel free to contact me via [email](mailto:c2eriku@gmail.com), giving comments, or submit pull request.  
 I appreciate your review and really welcome your feedback and suggestions.
