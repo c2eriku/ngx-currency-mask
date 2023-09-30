@@ -1,4 +1,4 @@
-import { Inject, Injectable, Optional } from '@angular/core';
+import { ElementRef, Inject, Injectable, Optional } from '@angular/core';
 import { NGX_CURRENCY_MASK_CONFIG, NgxCurrencyMaskConfig } from './ngx-currency-mask.config';
 
 @Injectable({
@@ -30,5 +30,39 @@ export class NgxCurrencyMaskService {
     }
   }
 
+  toDecimalFormat(value: string, decimalSeparator: string): string {
+    const decimalFormat = value.replace(new RegExp(`[^0-9\\${decimalSeparator}\-]`, 'g'), '')
+      .replace(new RegExp(`\\${decimalSeparator}`, 'g'), '.');
+    return decimalFormat;
+  }
+
+  truncateNumber(numStr: string, decimalSeparator: string, maxScale: number): any {
+    if (isNaN(Number(numStr))) { throw new Error('It\'s not a Number!'); }
+    const separatorIndex = numStr.search(new RegExp(`\\${decimalSeparator}`, 'g'));
+    if (separatorIndex > -1) {
+      const truncateNumber = numStr.slice(0, separatorIndex + maxScale + 1);
+      return {
+        value: truncateNumber,
+        offset: numStr.length - truncateNumber.length
+      };
+    }
+
+    return {
+      value: numStr,
+      offset: 0
+    }
+  }
+
+  /**
+   * Sets the cursor position within an HTMLInputElement.
+   * @param {HTMLInputElement} el An input element to set the cursor position for.
+   * @param {number} cursorPosition The desired cursor position to set.
+   */
+  setCursorPosition(el: ElementRef<HTMLInputElement>, cursorPosition: number): void {
+    if (cursorPosition <= -1) {
+      cursorPosition = 0;
+    }
+    el.nativeElement.setSelectionRange(cursorPosition, cursorPosition);
+  }
 
 }

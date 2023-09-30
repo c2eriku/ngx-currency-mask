@@ -57,7 +57,6 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
       this.minScale = scaleArray[1];
       this.maxScale = scaleArray[2];
     }
-
   }
 
 
@@ -68,7 +67,7 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
 
     if (event.key == 'Backspace') {
       if (target.value[selectionStart - 1] == this.thousandsSeparator) {
-        this.setCursorPosition(selectionStart - 1);
+        this.service.setCursorPosition(this.el, selectionStart - 1);
         event.preventDefault();
       }
     }
@@ -110,11 +109,11 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
     }
 
     if (target.value) {
-      let decimalFormat: string = this.toDecimalFormat(target.value);
+      let decimalFormat: string = this.service.toDecimalFormat(target.value, this.decimalSeparator);
       const decimalPart = target.value.split(this.decimalSeparator)[1];
       const decimalPlaces = decimalPart ? (decimalPart.length > this.maxScale ? this.maxScale : decimalPart.length) : 0;
 
-      const truncRtn = this.truncateNumber(decimalFormat);
+      const truncRtn = this.service.truncateNumber(decimalFormat, this.decimalSeparator, this.maxScale);
       const decimalNumber = Number(truncRtn.value);
 
       const currencyFormat = decimalNumber.toLocaleString(this.locale, {
@@ -124,7 +123,7 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
 
       const cursorOffset = currencyFormat.length + this.prefix?.length + this.postfix?.length - target.value.length + truncRtn.offset;
       target.value = this.prefix + currencyFormat + this.postfix;
-      this.setCursorPosition(selectionIndex + cursorOffset);
+      this.service.setCursorPosition(this.el, selectionIndex + cursorOffset);
 
       this.onChange(decimalNumber);
       this.onTouched();
@@ -144,8 +143,8 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
         target.value = target.value.slice(0, -1);
       }
 
-      let decimalFormat: string = this.toDecimalFormat(target.value);
-      const decimalNumber = Number(this.truncateNumber(decimalFormat).value);
+      let decimalFormat: string = this.service.toDecimalFormat(target.value, this.decimalSeparator);
+      const decimalNumber = Number(this.service.truncateNumber(decimalFormat, this.decimalSeparator, this.maxScale).value);
 
       const currencyFormat = decimalNumber.toLocaleString(this.locale, {
         minimumIntegerDigits: this.integerScale,
@@ -166,12 +165,12 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
     const selectionStart: number = target.selectionStart ?? target.value.length;
 
     if (target.value) {
-      const decimalFormat = this.toDecimalFormat(target.value);
+      const decimalFormat = this.service.toDecimalFormat(target.value, this.decimalSeparator);
       const currencyFormat = Number(decimalFormat).toLocaleString(this.locale);
 
       const cursorOffset = currencyFormat.length - target.value.length;
       target.value = currencyFormat;
-      this.setCursorPosition(selectionStart + cursorOffset);
+      this.service.setCursorPosition(this.el, selectionStart + cursorOffset);
 
       this.onChange(decimalFormat);
       this.onTouched();
@@ -223,40 +222,10 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
 
 
 
-  /**
-   * Sets the cursor position within an HTMLInputElement.
-   * @param {HTMLInputElement} el An input element to set the cursor position for.
-   * @param {number} cursorPosition The desired cursor position to set.
-   */
-  setCursorPosition(cursorPosition: number): void {
-    if (cursorPosition <= -1) {
-      cursorPosition = 0;
-    }
-    this.el.nativeElement.setSelectionRange(cursorPosition, cursorPosition);
-  }
-
-  
-  toDecimalFormat(value: string): string {
-    const decimalFormat = value.replace(new RegExp(`[^0-9\\${this.decimalSeparator}\-]`, 'g'), '')
-      .replace(new RegExp(`\\${this.decimalSeparator}`, 'g'), '.');
-    return decimalFormat;
-  }
 
 
-  truncateNumber(numStr: string): any {
-    if (isNaN(Number(numStr))) { throw new Error('It\'s not a Number!'); }
-    const separatorIndex = numStr.search(new RegExp(`\\${this.decimalSeparator}`, 'g'));
-    if (separatorIndex > -1) {
-      const truncateNumber = numStr.slice(0, separatorIndex + this.maxScale + 1);
-      return {
-        value: truncateNumber,
-        offset: numStr.length - truncateNumber.length
-      };
-    }
 
-    return {
-      value: numStr,
-      offset: 0
-    }
-  }
+
+
+
 }
