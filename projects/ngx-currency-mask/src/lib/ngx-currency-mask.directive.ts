@@ -33,6 +33,7 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
   minScale: number = 0;
   maxScale: number = 0;
   integerScale: number = 1;
+
   thousandsSeparator: string = ',';
   decimalSeparator: string = '.';
 
@@ -101,7 +102,7 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
       return;
     }
 
-    if (target.value.endsWith(this.decimalSeparator)){
+    if (target.value.endsWith(this.decimalSeparator)) {
       if (selectionIndex == target.value.length) {
         return;
       }
@@ -109,17 +110,19 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
     }
 
     if (target.value) {
-      let decimalNumber: number = this.getDecimalNumber(target.value);
+      let decimalFormat: string = this.toDecimalFormat(target.value);
       const decimalPart = target.value.split(this.decimalSeparator)[1];
       const decimalPlaces = decimalPart ? (decimalPart.length > this.maxScale ? this.maxScale : decimalPart.length) : 0;
 
-      decimalNumber = this.truncateNumber(decimalNumber);
+      const truncRtn = this.truncateNumber(decimalFormat);
+      const decimalNumber = Number(truncRtn.value);
+
       const currencyFormat = decimalNumber.toLocaleString(this.locale, {
         minimumFractionDigits: decimalPlaces,
         maximumFractionDigits: this.maxScale
       });
 
-      const cursorOffset = currencyFormat.length + this.prefix?.length + this.postfix?.length - target.value.length;
+      const cursorOffset = currencyFormat.length + this.prefix?.length + this.postfix?.length - target.value.length + truncRtn.offset;
       target.value = this.prefix + currencyFormat + this.postfix;
       this.setCursorPosition(selectionIndex + cursorOffset);
 
@@ -135,23 +138,22 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
   @HostListener('blur', ['$event'])
   onBlur(event: any) {
     const target: HTMLInputElement = event.target as HTMLInputElement;
-    const selectionIndex: number = target.selectionStart ?? target.value.length;
 
     if (target.value) {
       if (target.value.endsWith(this.decimalSeparator)) {
         target.value = target.value.slice(0, -1);
       }
-      let decimalNumber: number = this.getDecimalNumber(target.value);
-      decimalNumber = this.truncateNumber(decimalNumber);
+
+      let decimalFormat: string = this.toDecimalFormat(target.value);
+      const decimalNumber = Number(this.truncateNumber(decimalFormat).value);
+
       const currencyFormat = decimalNumber.toLocaleString(this.locale, {
         minimumIntegerDigits: this.integerScale,
         minimumFractionDigits: this.maxScale,
         maximumFractionDigits: this.maxScale
       });
 
-      const cursorOffset = currencyFormat.length - target.value.length;
       target.value = this.prefix + currencyFormat + this.postfix;
-      this.setCursorPosition(selectionIndex + cursorOffset);
 
       this.onChange(decimalNumber);
     }
@@ -164,7 +166,7 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
     const selectionStart: number = target.selectionStart ?? target.value.length;
 
     if (target.value) {
-      const decimalFormat = this.getDecimalNumber(target.value);
+      const decimalFormat = this.toDecimalFormat(target.value);
       const currencyFormat = Number(decimalFormat).toLocaleString(this.locale);
 
       const cursorOffset = currencyFormat.length - target.value.length;
@@ -221,17 +223,6 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
 
 
 
-
-  getDecimalNumber(value: string): number {
-    const decimalFormat = value.replace(new RegExp(`[^0-9\\${this.decimalSeparator}\-]`, 'g'), '')
-      .replace(new RegExp(`\\${this.decimalSeparator}`, 'g'), '.');
-    return Number(decimalFormat);
-  }
-
-
-
-
-
   /**
    * Sets the cursor position within an HTMLInputElement.
    * @param {HTMLInputElement} el An input element to set the cursor position for.
@@ -244,20 +235,28 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
     this.el.nativeElement.setSelectionRange(cursorPosition, cursorPosition);
   }
 
+  
+  toDecimalFormat(value: string): string {
+    const decimalFormat = value.replace(new RegExp(`[^0-9\\${this.decimalSeparator}\-]`, 'g'), '')
+      .replace(new RegExp(`\\${this.decimalSeparator}`, 'g'), '.');
+    return decimalFormat;
+  }
 
-  /**
-   * Truncates a number to a specified number of decimal places.
-   * @param {number} number A number to be truncated.
-   * @returns {number} The truncated number.
-   */
-  truncateNumber(number: number): number {
-    if (isNaN(number)) { throw new Error('It\'s not a Number!'); }
-    const numberStr = number.toString();
-    const separatorIndex = numberStr.search(new RegExp(`\\${this.decimalSeparator}`, 'g'));
+
+  truncateNumber(numStr: string): any {
+    if (isNaN(Number(numStr))) { throw new Error('It\'s not a Number!'); }
+    const separatorIndex = numStr.search(new RegExp(`\\${this.decimalSeparator}`, 'g'));
     if (separatorIndex > -1) {
-      const truncateNumber = numberStr.slice(0, separatorIndex + this.maxScale + 1);
-      return Number(truncateNumber);
+      const truncateNumber = numStr.slice(0, separatorIndex + this.maxScale + 1);
+      return {
+        value: truncateNumber,
+        offset: numStr.length - truncateNumber.length
+      };
     }
-    return number;
+
+    return {
+      value: numStr,
+      offset: 0
+    }
   }
 }
