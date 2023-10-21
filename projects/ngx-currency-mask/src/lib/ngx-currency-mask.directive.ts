@@ -203,7 +203,8 @@ export class NgxCurrencyMaskDirective implements ControlValueAccessor, Validator
           minimumFractionDigits: this.minScale,
           maximumFractionDigits: this.maxScale
         }) + this.postfix;
-
+    } else {
+      this.el.nativeElement.value = '';
     }
   }
 
